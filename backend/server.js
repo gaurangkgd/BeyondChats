@@ -12,8 +12,27 @@ const app = express();
 connectDB();
 
 // Middleware
-const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
-app.use(cors({ origin: allowedOrigin }));
+// Configure CORS to accept the exact request origin when it matches allowed origins.
+// `ALLOWED_ORIGIN` may be a single origin or a comma-separated list. Trailing
+// slashes are ignored when matching so `https://site.app` and
+// `https://site.app/` are treated the same.
+const allowedOriginEnv = process.env.ALLOWED_ORIGIN || process.env.BEYONDCHATS_URL || '*';
+const allowedOrigins = String(allowedOriginEnv)
+  .split(',')
+  .map(s => s.trim().replace(/\/+$|\/$/g, ''));
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow tools/servers (no origin) such as curl/Postman
+    if (!origin) return callback(null, true);
+    const normalizedReqOrigin = origin.replace(/\/+$/g, '');
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(normalizedReqOrigin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
