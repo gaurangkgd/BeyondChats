@@ -64,8 +64,7 @@ const articleSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-articleSchema.index({ url: 1 });
+// Index for faster queries (url uses `unique: true` on the field, so no separate index needed)
 articleSchema.index({ isOptimized: 1 });
 articleSchema.index({ originalArticleId: 1 });
 
