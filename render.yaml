@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: beyondchats-backend
+    env: node
+    branch: main
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    autoDeploy: true
+    healthCheckPath: /
+
+staticSites:
+  - type: static
+    name: beyondchats-frontend
+    branch: main
+    buildCommand: cd client && npm install && npm run build
+    publishPath: client/dist
+    autoDeploy: true

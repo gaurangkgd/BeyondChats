@@ -244,7 +244,6 @@ const ArticleModal = ({ article, onClose }) => {
                 '&:hover': { color: '#43a047', textDecoration: 'underline wavy' },
               },
               '& .icon-row': { display: 'none' },
-              transition: 'box-shadow 0.3s, border 0.3s',
             }}
             dangerouslySetInnerHTML={{ __html: processedHtml }}
           />
