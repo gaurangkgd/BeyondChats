@@ -137,9 +137,3 @@ Notes:
 
 ---
 
-If you'd like, I can:
-- Create a GitHub repo and push (I can provide the exact commands — I cannot run them on your machine)
-- Add a short architecture PNG/SVG (I can generate an ASCII or Mermaid diagram)
-- Update `PHASE1_README.md` or create a `SUBMISSION.md` with a checklist you can tick off
-
-Tell me which of these you'd like next.
