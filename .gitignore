@@ -1,10 +1,17 @@
 # Dependencies
 node_modules/
+**/node_modules/
 package-lock.json
+yarn.lock
 
 # Environment variables
 .env
+.env.*
 .env.local
+.env.development
+.env.production
+# Keep example env
+!.env.example
 
 # Logs
 logs/
@@ -19,15 +26,37 @@ npm-debug.log*
 dist/
 build/
 client/build/
+client/dist/
+backend/build/
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Temp and backups
+*.bak
+*.tmp
+server.js.bak
+
+# Caches
+.cache/
+.parcel-cache/
+.next/
+coverage/
+/.turbo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
 
 # Python (if any)
 __pycache__/
