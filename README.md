@@ -102,6 +102,18 @@ Please provide a live frontend URL here (Netlify/Vercel/GitHub Pages). Example:
 
 ---
 
+## Screenshots
+
+### Home / Article List
+![Home view](docs/screenshots/home.png.png)
+
+### Original Article
+![Original article view](docs/screenshots/article_original.png.png)
+
+### Optimized Article
+![Optimized article view](docs/screenshots/article_optimized.png.png)
+
+
 ## How to push this repo to GitHub (commands you run locally)
 
 Option A — create a remote repo and push (manual remote):
