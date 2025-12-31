@@ -3,16 +3,6 @@
 A small full-stack project that scrapes articles, optimizes content with an LLM-based optimizer, and presents original vs optimized articles for easy comparison.
 
 ---
-
-## ✅ Submission Checklist
-- [ ] Project completeness (features implemented)
-- [ ] Clear `README.md` and setup docs (this file)
-- [ ] UI/UX polished and responsive
-- [ ] Live link to frontend (deployed)
-- [ ] Code quality: linting and organized structure
-
----
-
 ## Repo Structure
 ```
 / (repo root)
@@ -168,15 +158,50 @@ gh repo create your-username/BeyondChats --public --source=. --remote=origin --p
 
 Notes:
 - Commit frequently and write clear messages (feature/fix/task). Reviewers expect to see development history.
-- Make sure `README.md` is at repo root and repository is public.
+## BeyondChats
 
----
+A compact full-stack app that scrapes articles, generates LLM-optimized versions, and shows original vs optimized content.
 
-## Tips for a strong submission
-- Add a short video or GIF showing original → optimized flow.
-- Ensure the frontend displays both original and optimized versions clearly.
-- Add a `LIVE_LINK` in this README and in `PHASE1_README.md` if required.
-- If you use environment secrets for production (OpenAI keys, DB URIs), do NOT commit them—use environment variables and `.env.example`.
+### Repo layout
+- `/backend` — Node/Express API, Mongoose models, scripts (`scrape`, `optimize`)
+- `/client` — React (Vite) frontend
 
----
+### Quick start (local)
+Prereqs: Node.js (>=16), npm, MongoDB (local or Atlas).
+
+Backend:
+```bash
+cd backend
+npm install
+cp .env.example .env    # edit MONGODB_URI, ALLOWED_ORIGIN, LLM keys
+npm run dev
+# optional: populate DB
+npm run scrape
+npm run optimize
+```
+
+Frontend:
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Frontend: `http://localhost:5173`. Backend: `http://localhost:5000` (or `PORT` in `.env`).
+
+### Architecture (short)
+- React frontend calls `/api/articles` on the Express backend.
+- Backend stores original and optimized articles in MongoDB.
+- `backend/scripts` runs the scraper and optimizer to populate the DB.
+
+### Deploy & verify
+- Ensure deployed backend `MONGODB_URI` points to the Atlas DB with your data and `ALLOWED_ORIGIN` matches the frontend URL.
+- Set frontend `VITE_API_BASE_URL` to the backend API URL and redeploy.
+
+API checks:
+- Original: `GET <BACKEND_URL>/api/articles?isOptimized=false&limit=10`
+- Optimized: `GET <BACKEND_URL>/api/articles?isOptimized=true&limit=10`
+
+Notes: Keep secrets out of source; use `.env.example` and platform env vars for production keys/URIs.
+
 
