@@ -1,6 +1,6 @@
 # BeyondChats
 
-A small full-stack project that scrapes articles, optimizes content, and presents original vs optimized articles.
+A small full-stack project that scrapes articles, optimizes content with an LLM-based optimizer, and presents original vs optimized articles for easy comparison.
 
 ---
 
@@ -43,11 +43,22 @@ Open a terminal and run:
 ```bash
 cd backend
 npm install
-# create .env (copy .env.example)
-# set MONGODB_URI and any keys
-node server.js
-# or if package.json has a script:
-# npm run start
+# Copy example env and edit values:
+cp .env.example .env
+# Set the following in backend/.env:
+# - MONGODB_URI (MongoDB Atlas or mongodb://localhost:27017/beyondchats)
+# - GROQ_API_KEY (or other LLM key)
+# - GOOGLE_API_KEY and GOOGLE_SEARCH_ENGINE_ID (if using search)
+# - ALLOWED_ORIGIN (frontend URL, e.g. https://beyond-chats-liart.vercel.app)
+
+# Start dev server
+npm run dev
+
+# Run scraper (saves original articles to DB)
+npm run scrape
+
+# Run optimizer (creates optimized articles referencing originals)
+npm run optimize
 ```
 
 2) Frontend
@@ -57,8 +68,11 @@ Open a separate terminal and run:
 ```bash
 cd client
 npm install
+# Start dev server (Vite)
 npm run dev
-# or build: npm run build
+
+# Build for production
+npm run build
 ```
 
 Frontend will typically run on `http://localhost:5173` (Vite default) and backend on `http://localhost:5000`.
@@ -67,20 +81,30 @@ Frontend will typically run on `http://localhost:5173` (Vite default) and backen
 
 ## Data Flow / Architecture (quick diagram)
 
-Simple data flow:
-
-Frontend (React) --> Backend (Express API) --> MongoDB
+Overview:
+- The React frontend (`/client`) requests article lists and individual articles from the Express API (`/backend`).
+- The backend stores original scraped articles and generated optimized articles in MongoDB.
+- Background scripts in `backend/scripts` run the scraper and optimizer to populate the DB.
 
 ASCII diagram:
 
 ```
-[User Browser]
-    |
-    | HTTP (clicks / open article)
-    v
-[React Client] --fetch--> [Express API - /api/articles] --query--> [MongoDB]
-                          |
-                          +-- trigger scrapers/optimizers (scripts)
+[Browser (User)]
+  |
+  |  (1) GET / (UI)  -- Vite frontend serves pages and fetches data
+  v
+[React Client] --fetch--> [Express API - /api/articles?isOptimized={true|false}]
+                |
+                | (2) Query / Read/Write
+                v
+              [MongoDB Atlas]
+
+Background jobs:
+- `backend/scripts/scraper.js` scrapes original articles and POSTs/creates Article documents.
+- `backend/scripts/contentOptimizer.js` reads originals, calls LLM, and saves optimized versions.
+
+Notes:
+- `ALLOWED_ORIGIN` env var controls CORS on the backend and should include the frontend URL.
 ```
 
 ---
@@ -93,12 +117,19 @@ Keep utility scripts (scraper, optimizer) inside `backend/scripts` so reviewers 
 
 ---
 
-## Live Link
-Please provide a live frontend URL here (Netlify/Vercel/GitHub Pages). Example:
+## Live Links
+The deployed frontend and backend for this submission (replace with your live URLs if different):
 
-- Frontend: https://your-frontend.example.com
+- Frontend (Vercel): https://beyond-chats-liart.vercel.app
+- Backend (Render): https://beyondchats-3sb0.onrender.com
 
-(Include both original and optimized article links so reviewers can compare.)
+How to verify original vs optimized on the live site:
+- Open the frontend link and use the tabs `Original Articles` / `Optimized Articles` at the top of the page to toggle lists.
+- Backend API endpoints (for direct checking):
+  - Get original articles: `GET https://beyondchats-3sb0.onrender.com/api/articles?isOptimized=false&limit=10`
+  - Get optimized articles: `GET https://beyondchats-3sb0.onrender.com/api/articles?isOptimized=true&limit=10`
+
+If you don't see data on the live frontend, ensure the deployed backend's `MONGODB_URI` points to the Atlas DB containing the data and that `ALLOWED_ORIGIN` includes the frontend URL.
 
 ---
 
