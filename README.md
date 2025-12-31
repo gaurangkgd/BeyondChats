@@ -1,129 +1,364 @@
-# BeyondChats
+# BeyondChats - Article Scraper & AI Optimizer
 
-A small full-stack project that scrapes articles, optimizes content with an LLM-based optimizer, and presents original vs optimized articles for easy comparison.
+A full-stack web application that scrapes blog articles, optimizes them using AI, and displays original vs optimized versions for comparison.
+
+## 🎯 What This Project Does
+
+This project is divided into **3 phases**:
+
+### Phase 1: Scraping & CRUD API ✅
+- Scrapes the 5 oldest articles from [BeyondChats blogs](https://beyondchats.com/blogs/)
+- Stores articles in MongoDB database
+- Provides complete CRUD API endpoints
+
+### Phase 2: AI Content Optimization ✅
+- Searches article titles on Google
+- Scrapes top 2 ranking articles from search results
+- Uses AI (Groq/Llama) to optimize original articles
+- Creates enhanced versions with better formatting and SEO
+- Adds citations to reference articles
+
+### Phase 3: React Frontend ✅
+- Beautiful, responsive UI built with React and Material-UI
+- Displays original and optimized articles side-by-side
+- Tab-based navigation to switch between views
+- Modal view for detailed article reading
 
 ---
-## Repo Structure
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **Node.js** (v16 or higher)
+- **npm** or **yarn**
+- **MongoDB** (local installation or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account)
+
+### 1. Clone & Install
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd BeyondChats
+
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ../client
+npm install
 ```
-/ (repo root)
-  /backend        # Node/Express backend (server, models, routes, scripts, utils)
-  /client         # React (Vite) frontend
-  .env.example
-  README.md
-```
 
-Make sure your `backend` folder contains:
-- `server.js`
-- `package.json` (or use root package.json)
-- `models/`, `routes/`, `config/`, `scripts/`, `utils/`
+### 2. Configure Environment Variables
 
----
-
-## Local Setup (Windows / macOS / Linux)
-
-Prerequisites:
-- Node.js (>=16)
-- npm or yarn
-- MongoDB (local or Atlas) and connection string in `.env`
-
-1) Backend
-
-Open a terminal and run:
+Create a `.env` file in the `backend` folder:
 
 ```bash
 cd backend
-npm install
-# Copy example env and edit values:
-cp .env.example .env
-# Set the following in backend/.env:
-# - MONGODB_URI (MongoDB Atlas or mongodb://localhost:27017/beyondchats)
-# - GROQ_API_KEY (or other LLM key)
-# - GOOGLE_API_KEY and GOOGLE_SEARCH_ENGINE_ID (if using search)
-# - ALLOWED_ORIGIN (frontend URL, e.g. https://beyond-chats-liart.vercel.app)
+# Copy the example (if exists) or create new .env file
+```
 
-# Start dev server
-npm run dev
+Add these variables to `backend/.env`:
 
-# Run scraper (saves original articles to DB)
+```env
+# Server Configuration
+PORT=5001
+NODE_ENV=development
+
+# Database (MongoDB Atlas or local)
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
+# OR for local: mongodb://localhost:27017/beyondchats
+
+# CORS - Frontend URL (IMPORTANT!)
+ALLOWED_ORIGIN=http://localhost:5173
+
+# Source URL
+BEYONDCHATS_URL=https://beyondchats.com/blogs/
+
+# AI Optimization (Phase 2) - Get free key from https://console.groq.com
+GROQ_API_KEY=gsk_your_groq_api_key_here
+
+# Google Search (Optional - for better search results)
+GOOGLE_API_KEY=your_google_api_key
+GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id
+
+# API Base URL (for scripts)
+API_BASE_URL=http://localhost:5001
+```
+
+### 3. Start the Backend
+
+```bash
+cd backend
+npm start
+# Server runs on http://localhost:5001
+```
+
+### 4. Populate Database (Optional)
+
+In a new terminal:
+
+```bash
+cd backend
+# Scrape original articles
 npm run scrape
 
-# Run optimizer (creates optimized articles referencing originals)
+# Optimize articles with AI (requires GROQ_API_KEY)
 npm run optimize
 ```
 
-2) Frontend
+### 5. Start the Frontend
 
-Open a separate terminal and run:
+In another terminal:
 
 ```bash
 cd client
-npm install
-# Start dev server (Vite)
 npm run dev
-
-# Build for production
-npm run build
+# Frontend runs on http://localhost:5173
 ```
 
-Frontend will typically run on `http://localhost:5173` (Vite default) and backend on `http://localhost:5000`.
+### 6. View the Application
+
+Open your browser and navigate to: **http://localhost:5173**
+
+- Click **"ORIGINAL ARTICLES"** tab to see scraped articles
+- Click **"OPTIMIZED ARTICLES"** tab to see AI-optimized versions
+- Click any article card to view full content in a modal
 
 ---
 
-## Data Flow / Architecture (quick diagram)
-
-Overview:
-- The React frontend (`/client`) requests article lists and individual articles from the Express API (`/backend`).
-- The backend stores original scraped articles and generated optimized articles in MongoDB.
-- Background scripts in `backend/scripts` run the scraper and optimizer to populate the DB.
-
-ASCII diagram:
+## 📁 Project Structure
 
 ```
-[Browser (User)]
-  |
-  |  (1) GET / (UI)  -- Vite frontend serves pages and fetches data
-  v
-[React Client] --fetch--> [Express API - /api/articles?isOptimized={true|false}]
-                |
-                | (2) Query / Read/Write
-                v
-              [MongoDB Atlas]
-
-Background jobs:
-- `backend/scripts/scraper.js` scrapes original articles and POSTs/creates Article documents.
-- `backend/scripts/contentOptimizer.js` reads originals, calls LLM, and saves optimized versions.
-
-Notes:
-- `ALLOWED_ORIGIN` env var controls CORS on the backend and should include the frontend URL.
+BeyondChats/
+├── backend/                 # Node.js/Express Backend
+│   ├── config/
+│   │   └── db.js           # MongoDB connection
+│   ├── models/
+│   │   └── Article.js      # Article database schema
+│   ├── routes/
+│   │   └── articles.js    # API routes (CRUD operations)
+│   ├── scripts/
+│   │   ├── scraper.js      # Scrape articles from BeyondChats
+│   │   └── contentOptimizer.js  # AI optimization pipeline
+│   ├── utils/
+│   │   ├── scraper.js      # Scraper utility class
+│   │   ├── googleSearch.js # Google search functionality
+│   │   ├── articleScraper.js # Scrape article content
+│   │   └── contentOptimizer.js # AI/LLM integration
+│   ├── server.js           # Express server entry point
+│   ├── package.json
+│   └── .env               # Environment variables (create this)
+│
+├── client/                 # React Frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   │   ├── ArticleCard.jsx
+│   │   │   ├── ArticleModal.jsx
+│   │   │   ├── ArticlesGrid.jsx
+│   │   │   ├── TabControls.jsx
+│   │   │   └── ...
+│   │   ├── api.js         # API client functions
+│   │   └── App.jsx        # Main app component
+│   ├── package.json
+│   └── vite.config.js
+│
+└── README.md              # This file
 ```
 
 ---
 
-## What I moved / Project organization notes
-- Backend files are under `/backend` (models, routes, config, scripts, utils).
-- Frontend is under `/client`.
+## 🔌 API Endpoints
 
-Keep utility scripts (scraper, optimizer) inside `backend/scripts` so reviewers can run them with the proper environment.
+Base URL: `http://localhost:5001/api/articles`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/articles` | Get all articles (with pagination) |
+| `GET` | `/api/articles/:id` | Get single article by ID |
+| `POST` | `/api/articles` | Create new article |
+| `PUT` | `/api/articles/:id` | Update article |
+| `DELETE` | `/api/articles/:id` | Delete article |
+| `POST` | `/api/articles/scrape` | Trigger scraping of BeyondChats |
+
+### Query Parameters
+
+- `?page=1` - Page number (default: 1)
+- `?limit=10` - Items per page (default: 10)
+- `?isOptimized=true` - Filter optimized articles
+- `?isOptimized=false` - Filter original articles
+
+### Example Requests
+
+```bash
+# Get all original articles
+curl http://localhost:5001/api/articles?isOptimized=false
+
+# Get optimized articles
+curl http://localhost:5001/api/articles?isOptimized=true
+
+# Get single article
+curl http://localhost:5001/api/articles/ARTICLE_ID
+
+# Trigger scraping
+curl -X POST http://localhost:5001/api/articles/scrape
+```
 
 ---
 
-## Live Links
-The deployed frontend and backend for this submission (replace with your live URLs if different):
+## 🛠️ Available Scripts
 
-- Frontend (Vercel): https://beyond-chats-liart.vercel.app
-- Backend (Render): https://beyondchats-3sb0.onrender.com
+### Backend Scripts
 
-How to verify original vs optimized on the live site:
-- Open the frontend link and use the tabs `Original Articles` / `Optimized Articles` at the top of the page to toggle lists.
-- Backend API endpoints (for direct checking):
-  - Get original articles: `GET https://beyondchats-3sb0.onrender.com/api/articles?isOptimized=false&limit=10`
-  - Get optimized articles: `GET https://beyondchats-3sb0.onrender.com/api/articles?isOptimized=true&limit=10`
+```bash
+cd backend
 
-If you don't see data on the live frontend, ensure the deployed backend's `MONGODB_URI` points to the Atlas DB containing the data and that `ALLOWED_ORIGIN` includes the frontend URL.
+npm start          # Start production server
+npm run dev        # Start development server (with auto-reload)
+npm run scrape     # Scrape articles from BeyondChats
+npm run optimize   # Optimize all articles with AI
+```
+
+### Frontend Scripts
+
+```bash
+cd client
+
+npm run dev        # Start development server
+npm run build      # Build for production
+npm run preview    # Preview production build
+```
 
 ---
 
-## Screenshots
+## 🏗️ Architecture Overview
+
+```
+┌─────────────────┐
+│   Browser       │
+│  (User)         │
+└────────┬────────┘
+         │
+         │ HTTP Requests
+         ▼
+┌─────────────────┐
+│  React Frontend  │  ← http://localhost:5173
+│   (Vite)         │
+└────────┬────────┘
+         │
+         │ API Calls
+         │ (fetch articles)
+         ▼
+┌─────────────────┐
+│  Express API     │  ← http://localhost:5001
+│   (Backend)      │
+└────────┬────────┘
+         │
+         │ Query/Write
+         ▼
+┌─────────────────┐
+│   MongoDB        │
+│   (Database)     │
+└─────────────────┘
+
+Background Jobs:
+┌─────────────────┐
+│  Scraper Script  │ → Scrapes BeyondChats → Saves to DB
+└─────────────────┘
+
+┌─────────────────┐
+│ Optimizer Script│ → Google Search → AI Optimization → Saves to DB
+└─────────────────┘
+```
+
+---
+
+## 🔑 Getting API Keys
+
+### Groq API Key (Required for Phase 2)
+
+1. Visit [https://console.groq.com/keys](https://console.groq.com/keys)
+2. Sign in with Google
+3. Click "Create API Key"
+4. Copy the key and add to `backend/.env` as `GROQ_API_KEY`
+
+**Why Groq?**
+- ⚡ 10x faster than OpenAI
+- 🆓 Generous free tier
+- 🎯 High quality (Llama 3.3 70B model)
+
+### Google Custom Search API (Optional)
+
+For more reliable search results:
+
+1. Go to [Google Custom Search](https://developers.google.com/custom-search)
+2. Create a Custom Search Engine
+3. Get API Key and Search Engine ID
+4. Add to `backend/.env`:
+   - `GOOGLE_API_KEY`
+   - `GOOGLE_SEARCH_ENGINE_ID`
+
+**Note:** The app works without this - it uses web scraping as a fallback.
+
+---
+
+## 🐛 Troubleshooting
+
+### CORS Errors
+
+If you see CORS errors in the browser console:
+
+1. Make sure `ALLOWED_ORIGIN` in `backend/.env` matches your frontend URL:
+   ```env
+   ALLOWED_ORIGIN=http://localhost:5173
+   ```
+2. Restart the backend server after changing `.env`
+
+### Port Already in Use
+
+If port 5001 is already in use:
+
+```bash
+# Windows
+netstat -ano | findstr :5001
+taskkill /PID <PID_NUMBER> /F
+
+# macOS/Linux
+lsof -ti:5001 | xargs kill -9
+```
+
+Or change the port in `backend/.env`:
+```env
+PORT=5002
+```
+
+### No Articles Showing
+
+1. Make sure the backend server is running
+2. Check if articles exist in database:
+   ```bash
+   curl http://localhost:5001/api/articles
+   ```
+3. If no articles, run the scraper:
+   ```bash
+   cd backend
+   npm run scrape
+   ```
+
+### MongoDB Connection Error
+
+1. Verify your `MONGODB_URI` in `backend/.env` is correct
+2. For MongoDB Atlas: Check your IP whitelist
+3. Test connection:
+   ```bash
+   # Should show "✅ MongoDB Connected"
+   cd backend
+   npm start
+   ```
+
+---
+
+## 📸 Screenshots
 
 ### Home / Article List
 ![Home view](docs/screenshots/home.png.png)
@@ -134,74 +369,47 @@ If you don't see data on the live frontend, ensure the deployed backend's `MONGO
 ### Optimized Article
 ![Optimized article view](docs/screenshots/article_optimized.png.png)
 
+---
 
-## How to push this repo to GitHub (commands you run locally)
+## 🌐 Deployment
 
-Option A — create a remote repo and push (manual remote):
+### Backend (Render/Railway/Heroku)
 
-```bash
-# from repo root
-git init                # only if not already a git repo
-git add .
-git commit -m "Initial commit"
-# create repo on GitHub and get remote URL (e.g. git@github.com:you/BeyondChats.git)
-git remote add origin <REMOTE_URL>
-git branch -M main
-git push -u origin main
-```
+1. Set environment variables in your hosting platform
+2. Make sure `ALLOWED_ORIGIN` includes your frontend URL
+3. Deploy from `backend` folder
 
-Option B — create & push with GitHub CLI (recommended if you have `gh`):
+### Frontend (Vercel/Netlify)
 
-```bash
-gh repo create your-username/BeyondChats --public --source=. --remote=origin --push
-```
+1. Set `VITE_API_BASE_URL` to your backend URL
+2. Deploy from `client` folder
 
-Notes:
-- Commit frequently and write clear messages (feature/fix/task). Reviewers expect to see development history.
-## BeyondChats
+### Example Live URLs
 
-A compact full-stack app that scrapes articles, generates LLM-optimized versions, and shows original vs optimized content.
+- Frontend: https://beyond-chats-liart.vercel.app
+- Backend: https://beyondchats-3sb0.onrender.com
 
-### Repo layout
-- `/backend` — Node/Express API, Mongoose models, scripts (`scrape`, `optimize`)
-- `/client` — React (Vite) frontend
+---
 
-### Quick start (local)
-Prereqs: Node.js (>=16), npm, MongoDB (local or Atlas).
+## 📝 License
 
-Backend:
-```bash
-cd backend
-npm install
-cp .env.example .env    # edit MONGODB_URI, ALLOWED_ORIGIN, LLM keys
-npm run dev
-# optional: populate DB
-npm run scrape
-npm run optimize
-```
+MIT
 
-Frontend:
-```bash
-cd client
-npm install
-npm run dev
-```
+---
 
-Frontend: `http://localhost:5173`. Backend: `http://localhost:5000` (or `PORT` in `.env`).
+## 🤝 Contributing
 
-### Architecture (short)
-- React frontend calls `/api/articles` on the Express backend.
-- Backend stores original and optimized articles in MongoDB.
-- `backend/scripts` runs the scraper and optimizer to populate the DB.
+This is an internship project. For questions or issues, please open an issue on GitHub.
 
-### Deploy & verify
-- Ensure deployed backend `MONGODB_URI` points to the Atlas DB with your data and `ALLOWED_ORIGIN` matches the frontend URL.
-- Set frontend `VITE_API_BASE_URL` to the backend API URL and redeploy.
+---
 
-API checks:
-- Original: `GET <BACKEND_URL>/api/articles?isOptimized=false&limit=10`
-- Optimized: `GET <BACKEND_URL>/api/articles?isOptimized=true&limit=10`
+## ✅ Project Checklist
 
-Notes: Keep secrets out of source; use `.env.example` and platform env vars for production keys/URIs.
+- [x] Phase 1: Scraping & CRUD API
+- [x] Phase 2: AI Content Optimization
+- [x] Phase 3: React Frontend
+- [x] Responsive Design
+- [x] Error Handling
+- [x] Documentation
 
-
+**Project Status: ✅ Complete**
